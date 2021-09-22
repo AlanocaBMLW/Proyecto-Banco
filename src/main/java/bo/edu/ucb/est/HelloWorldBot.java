@@ -62,6 +62,8 @@ public class HelloWorldBot extends TelegramLongPollingBot {
 			} else if (update.getMessage().getText().toString().equals("2") && flag && flag1) {
 				message.setText("funcionalidad no Implementada vuelva otro dia\n");
 				execute(message);
+				message.setText(mensajeInicial());
+				execute(message);
 			}
 		} catch (TelegramApiException e) {
 			e.printStackTrace();
