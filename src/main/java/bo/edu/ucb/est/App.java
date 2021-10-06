@@ -14,7 +14,7 @@ public class App
     {
         try {
                 TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
-                telegramBotsApi.registerBot(new HelloWorldBot());
+                telegramBotsApi.registerBot(new MenuBot());
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
