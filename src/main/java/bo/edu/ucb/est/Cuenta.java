@@ -13,6 +13,9 @@ public class Cuenta {
 		this.saldo = saldo;
 	}
 
+	public Cuenta() {
+	}
+
 	public int getNumCuenta() {
 		return numCuenta;
 	}

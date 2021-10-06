@@ -12,7 +12,6 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-
 public class MenuBot extends TelegramLongPollingBot {
 	int estado = 0;
 	// estado= 0 inicio del programa
@@ -26,6 +25,7 @@ public class MenuBot extends TelegramLongPollingBot {
 	int PIN;
 	ArrayList<Usuario> Usuarios = new ArrayList<Usuario>();
 	Usuario actual = null;
+	Cuenta cnt = null;
 
 	@Override
 	public void onUpdateReceived(Update update) {
@@ -82,42 +82,95 @@ public class MenuBot extends TelegramLongPollingBot {
 						message.setText("Ingrese solo digitos del 0 al 9");
 						execute(message);
 					}
-				} else if (estado == 3) {// Este se encarga de mover la decision y el estado
+				} else if (estado == 3) {// Este se encarga de mover la decision y el estado MENU
 					if (isNumeric(update.getMessage().getText())) {
 						decision = Integer.parseInt(update.getMessage().getText());
-						if (decision == 1) {
-							message.setText(verSaldo());
-							message.setText(
-									message.getText() + "Bienvenido\nElige una opcion\n\n1)Ver saldo\n2)Retirar dinero"
-											+ "\n3)Depositar dinero\n4)Crear Cuenta\n5)Salir");
+						if (decision == 1) {//este se encarga de ver el saldo
+							if (actual.getCuentas().isEmpty()) {
+								estado = 4;
+								message.setText("Seleccione la moneda\n1)Dolares\n2)Bolivianos");
+								execute(message);
+							} else {
+								message.setText("Que cuenta desea ver la informacion?\n");
+								for (int i = 0; i < actual.getCuentas().size(); i++) {
+									message.setText(message.getText() + i + ")\n o \n");
+								}
+								execute(message);
+								estado = 33;
+							}
 						} else if (decision == 2) {
 							message.setText(
 									retirarDinero() + "Bienvenido\nElige una opcion\n\n1)Ver saldo\n2)Retirar dinero"
 											+ "\n3)Depositar dinero\n4)Crear Cuenta\n5)Salir");
+							execute(message);
 						} else if (decision == 3) {
 							message.setText(
 									depositarDinero() + "Bienvenido\nElige una opcion\n\n1)Ver saldo\n2)Retirar dinero"
 											+ "\n3)Depositar dinero\n4)Crear Cuenta\n5)Salir");
-						} else if (decision == 4) {
-
+							execute(message);
 						} else if (decision == 5) {
-							estado = 0;
+							estado=0;
 						}
 
+					} else {
+						message.setText("Ingrese solo digitos entre 0 y 9");
+						execute(message);
 					}
+				} else if (estado == 33) {
+					String mensaje = "";
+					int numCuenta;
+					String moneda;
+					String tipo;
+					double saldo;
+					if (isNumeric(update.getMessage().getText())) {
+						decision = Integer.parseInt(update.getMessage().getText());//el numero de la cuenta
+						for (int i = 0; i < actual.getCuentas().size(); i++) {
+							if(decision==i+1) {
+								numCuenta = actual.getCuentas().get(i).getNumCuenta();
+								moneda = actual.getCuentas().get(i).getMoneda();
+								tipo = actual.getCuentas().get(i).getTipo();
+								saldo = actual.getCuentas().get(i).getSaldo();
+								mensaje = numCuenta+"\n"+moneda+"\n"+tipo+"\n"+saldo+"\n";
+							}
+						}
+						message.setText(mensaje+"Bienvenido\nElige una opcion\n\n1)Ver saldo\n2)Retirar dinero"
+								+ "\n3)Depositar dinero\n4)Crear Cuenta\n5)Salir");
+						execute(message);
+						estado=3;
+					}else {
+						message.setText("Ingrese solo digitos entre 0 y 9");
+						execute(message);
+					}
+				} else if (estado == 4) {// creacion de cuenta
+					if (isNumeric(update.getMessage().getText())) {
+						decision = Integer.parseInt(update.getMessage().getText());
+						if (decision == 1) {
+							cnt.setMoneda("Dolares");
+							cnt.setNumCuenta(100001);
+							cnt.setTipo("ahorro");// por defecto siempre sera ahorro en la creacion
+							cnt.setSaldo(0);
+						} else if (decision == 2) {
+							cnt.setMoneda("Bolivianos");
+							cnt.setNumCuenta(100001);
+							cnt.setTipo("ahorro");// por defecto siempre sera ahorro en la creacion
+							cnt.setSaldo(0);
+						}
+						actual.getCuentas().add(cnt);
+						message.setText(
+								"Se creo la cuenta satisfactoriamente\nElige una opcion\n\n1)Ver saldo\n2)Retirar dinero"
+										+ "\n3)Depositar dinero\n4)Crear Cuenta\n5)Salir");
+						execute(message);
+						estado = 3;// vuelve al menu
+					} else {
+						message.setText("Ingrese solo digitos entre 0 y 9");
+						execute(message);
+					}
+
 				}
 			} catch (TelegramApiException e) {
 				e.printStackTrace();
 			}
 		}
-	}
-
-	public String verSaldo() {
-		String mensaje = "";
-		for (int i = 0; i < actual.getCuentas().size(); i++) {
-			
-		}
-		return mensaje;
 	}
 
 	public String retirarDinero() {
